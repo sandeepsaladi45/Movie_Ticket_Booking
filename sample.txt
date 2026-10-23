@@ -1,0 +1,370 @@
+class User:
+    def __init__(self,id,name,passsword,isadmin):
+        self.id=id
+        self.name=name
+        self.passsword=passsword
+        self.isadmin=isadmin
+    def user_details(self):
+        return f"{self.id},{self.name},{self.passsword},{self.isadmin}\n"
+class Auth:
+    def Register(self):
+        id=input("Enter user id: ")
+        name=input("Enter user name: ")
+        passsword=input("Enter user password: ")
+        isadmin=input("Enter yes if your admin  else no: ")
+        new_user=User(id,name,passsword,isadmin)
+
+        with open("details.txt","r") as file:
+            list=file.readlines()
+
+    
+        flag=False
+        for lst  in list:
+            lst=lst.strip().split(",")
+
+            if lst[1]==name:
+                flag=True
+                break
+        if flag:
+            print("User already exit!.Use another user name.")
+        else:
+            with open("details.txt","a") as file:
+                        file.write(new_user.user_details())       
+    def Login(self):
+        name=input("Enter user name: ")
+        passsword=input("Enter user password: ")
+
+        with open("details.txt","r") as file:
+             list=file.readlines()
+        flag=False
+        user_id = None
+        is_admin = None
+        for lst in list:
+            lst=lst.strip().split(",")
+            if lst[1]==name:
+                 if lst[2]==passsword:
+                      flag=True
+                      user_id = lst[0]
+                      is_admin = lst[-1]
+                      break
+        if flag:
+            print("User Logined In")
+            return [user_id,is_admin]
+        else:
+            print("Invalid Credentils")
+
+# auth = Auth()
+# auth.Register()
+# auth.Login()
+
+class Product:
+
+    def __init__(self, id, pro_name, price):
+        self.id = id
+        self.pro_name = pro_name
+        self.price = price
+        self.quanty = 1
+
+    def pro_details(self):
+        return f"{self.id},{self.pro_name},{self.price},{self.quanty}\n"
+
+class ProHandle:
+    def add_product(self):
+        id = input("Enter the product id: ")
+        pro_name = input("Enter the product name: ")
+        price = input("Enter the product price: ")
+
+        pro = Product(id, pro_name, price)
+
+        with open("Product.txt", "r") as file:
+            products = file.readlines()
+
+        flag = False
+
+        for lst in products:
+            item = lst.strip().split(",")
+
+            if item[1] == pro_name and item[2] == price:
+                flag = True
+                break
+
+        if flag:
+            with open("Product.txt", "w") as file:
+                for lst in products:
+                    item = lst.strip().split(",")
+
+                    if item[1] == pro_name and item[2] == price:
+                        q = int(item[3]) + 1
+                        file.write(f"{item[0]},{item[1]},{item[2]},{q}\n")
+                    else:
+                        file.write(lst)
+        else:
+            with open("Product.txt", "a") as file:
+                file.write(pro.pro_details())
+    def decrease_quantity(self):
+        id = input("Enter Product id: ")
+        with open("Product.txt", "r") as file:
+            list = file.readlines()
+            flag = False
+            for lst in list:
+                item = lst.strip().split(",") 
+                if item[0] == id:
+                    flag = True
+            if flag:
+                with open("Product.txt", "w") as file:
+                    for lst in list:
+                        item  = lst.strip().split(",")
+                        if item[0] == id:
+                            if int(item[3])>1:
+                                q = int(item[3]) -1
+                                file.write(f"{item[0]},{item[1]},{item[2]},{q}\n")
+                        else:
+                            file.write(lst)
+            else:
+                print("Productt is out of stock!")
+    def del_pro(self):
+        id = input("Enter product id: ")
+        with open("Product.txt", "r") as file:
+            list = file.readlines()
+        flag = False
+        for lst in list:
+            item = lst.strip().split(",")
+            if item[0] == id:
+                flag = True
+                break
+        if flag:
+            with open("Product.txt", "w") as file:
+                for lst in list:
+                    item = lst.strip().split(",")
+                    if item[0]!=id:
+                        file.write(lst)
+        else:
+            print("Product Id Not Found!")
+    def update(self):
+        id = input("Enter The Product Id: ")
+        with open("Product.txt", "r") as file:
+            list = file.readlines()
+        flag = False
+        for lst in list:
+            item = lst.strip().split(",")
+            if item[0] == id:
+                flag = True
+                break
+        if flag:
+            with open("Product.txt", "w") as file:
+                for lst in list:
+                    item = lst.strip().split(",")
+                    if item[0] == id:
+                        pro_name = input(f"Change pro_name from {item[1]} to :")
+                        pro_price = input(f"Change pro_price from {item[2]} to :")
+                        file.write(f"{item[0]},{pro_name},{pro_price},{item[3]}\n")
+                    else:
+                        file.write(lst)
+        else:
+            print("Product Not Found!")
+    def View_Pro(self):
+        with open("Product.txt", "r") as file:
+            list = file.readlines()
+            print("Id Name price Quenty")
+            for lst in list:                
+                print(lst)
+# pro=ProHandle()
+# pro.add_product()
+# pro.decrease_quantity()
+# pro.del_pro()
+# pro.update()
+# pro.View_Pro()
+
+class Cart(ProHandle):
+    def __init__(self,user_id):
+        self.user_id = user_id
+    def add_cart(self):
+        pro_name = input ("Enter Pro Name: ")
+        price = input("Enter Pro Price: ")
+        with open("Product.txt","r") as file:
+            list = file.readlines()
+        
+        flag = False
+        new_pro = None
+        with open("Product.txt","w") as file:
+
+            for lst in list:
+                item = lst.strip().split(",")
+                if item[1] == pro_name and item[2] == price and int(item[-1]) > 0:
+                    flag = True
+                    new_pro = item
+                    q = int(item[-1]) - 1
+                    file.write(f"{item[0]},{item[1]},{item[2]},{q}\n")
+                else:
+                    file.write(lst)
+            if flag:
+                with open("Cart.txt","r") as file:
+                    list = file.readlines()
+                flag = False
+                with open("Cart.txt","w") as file:
+                    for lst in list:
+                        item = lst.strip().split(",")
+                        if item[2] == pro_name and item[3] == price and self.user_id == item[0]:
+                            flag = True
+                            q = int(item[-1]) + 1
+                            file.write(f"{item[0]},{item[1]},{item[2]},{item[3]},{q}\n")
+                        else:
+                            file.write(lst)
+                if flag == False:
+                    new_pro[-1] = "1"
+                    new_pro.insert(0,self.user_id)
+                    with open("Cart.txt","a") as file:
+                        file.write(",".join(new_pro)+"\n")
+            else:
+                print("Product OutOf Stock!")
+
+    def dec_Cart(self):
+        pro_name = input("Enter ProName: ")
+        price = input("Enter Price: ")
+        with open("Cart.txt","r") as file:
+            list = file.readlines()
+            flag = False
+        with open("Cart.txt","w") as file:
+            
+            for lst in list:
+                item  = lst.strip().split(",")
+                if item[0] == self.user_id and item[2] == pro_name and item[3] == price and int(item[-1]) >0:
+                    flag = True
+                    q = int(item[-1]) -1
+                    if q > 0:
+                        file.write(f"{item[0]},{item[1]},{item[2]},{item[3]},{q}\n")
+                else:
+                    file.write(lst)
+            if flag:
+                with open("Product.txt","r") as file:
+                    list = file.readlines()
+                with open("Product.txt","w")  as file:
+                    flag1 = False
+                    for lst in list:
+                        item = lst.strip().split(",")
+                        if item[1] == pro_name and item[2] == price:
+                            flag1 = True
+                            q = int(item[-1]) + 1
+                            file.write(f"{item[0]},{item[1]},{item[2]},{q}\n")
+                        else:
+                            file.write(lst)
+                    if flag1 == False:
+                        print("Product Not In Products")
+            else:
+                print("Product is not In Cart")
+
+    def del_cart_pro(self):
+        pro_name = input("Enter Product Name: ")
+        price = input("Enter Pro  Price: ")
+        with open("Cart.txt","r") as file:
+            list = file.readlines()
+        flag = False
+        with open("Cart.txt","w") as file:
+            for lst in list:
+                item = lst.strip().split(",")
+                if item[0] == self.user_id and item[2] == pro_name and item[3]  == price:
+                    flag = True
+                else:
+                    file.write(lst)
+            if flag == False:
+                print("Product not in cart!")
+
+    def view_cart(self):
+        with open("Cart.txt","r") as file:
+            list = file.readlines()
+        flag = False
+        total_price = 0
+        print("----------------------------------------")
+        print("|P_Id |Name      |Price     |Quantity  |")
+        print("----------------------------------------")
+        for lst in list:
+            citem = lst.strip().split(",")
+            if citem[0] == self.user_id:
+                total_price += int(citem[3]) * int(citem[4])
+                
+                print(f"|{citem[1] + (' ' * (5 - len(citem[1])))}|{citem[2] + (' ' * (10 - len(citem[2])))}|{citem[3] + (' ' * (10 - len(citem[3])))}|{citem[4] + (' ' * (10 - len(citem[4])))}|")
+        print("----------------------------------------")
+        print("Total Price is:", total_price)
+# cart = Cart("1")
+# cart.add_cart()
+# cart.dec_Cart()
+# cart.del_cart_pro()
+# cart.view_cart()
+
+
+def admin():
+    while True:
+        print("1)Add product ")
+        print("2)Decre Quentity")
+        print("3)delte item")
+        print("4)Update Item")
+        print("5)View Products")
+        print("6)Logout")
+        opt = input("Enter Your Choice: ")
+        ph = ProHandle()
+        if opt == "1":
+            ph.add_product()
+        elif opt == "2":
+            ph.decrease_quantity()
+        elif opt == "3":
+            ph.del_pro()
+        elif opt == "4":
+            ph.update()
+        elif opt == "5":
+            ph.View_Pro()
+        elif opt == "6":
+            print("Loged Out")
+            break
+        else:
+            print("Plece Choose Valid Option")
+
+
+def user(userid):
+    while True:
+        print("1)View Product")
+        print("2)Add to Cart")
+        print("3)Decrese Quentity In Cart")
+        print("4)Del Item From Cart")
+        print("5)View Cart") 
+        print("6)Logout")
+        opt = input("Choose an option:")
+        cart = Cart(userid)
+        if opt == "1":
+            cart.View_Pro()
+        elif opt == "2":
+            cart.add_cart()
+        elif opt == "3":
+            cart.dec_Cart()
+        elif opt == "4":
+            cart.del_cart_pro()
+        elif opt == "5":
+            cart.view_cart()
+        elif opt == "6":
+            print("Logoout")
+            break
+        else:
+            print("Choose valid Option.")
+
+def start():
+    while True:
+        print("1)Register")
+        print("2)Login")
+        print("3)Exit")
+        otp = input("Enter Your Option: ")
+        auth=Auth()
+        if otp == "1":
+            auth.Register()
+        elif otp == "2":
+            res = auth.Login()
+            if res[1] == "yes":
+                admin()
+            else:
+                user(res[0])
+        elif otp == "3":
+            print("Thanks for using ")
+            break
+        else:
+            print("Choose Valid Option")
+
+
+start()
